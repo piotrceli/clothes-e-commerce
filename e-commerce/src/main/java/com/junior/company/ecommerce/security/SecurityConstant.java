@@ -8,6 +8,9 @@ import java.util.Date;
 @Component
 public class SecurityConstant {
 
+    private SecurityConstant(){
+    }
+
     private static String SECRET_KEY;
     @Value("${secret.key}")
     private void setSecretKey(String secretKey) {

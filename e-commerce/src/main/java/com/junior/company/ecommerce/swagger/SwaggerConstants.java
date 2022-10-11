@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 @PropertySource("classpath:static/api-description.html")
 public class SwaggerConstants {
 
+    private SwaggerConstants(){
+    }
+
     public static final String API_KEY_REFERENCE = "JWT";
     public static final String AUTHORIZATION_SCOPE = "global";
     public static final String AUTHORIZATION_DESCRIPTION = "full access";
