@@ -40,14 +40,6 @@ public class CategoryMapper {
                 .build();
     }
 
-    public static CategoryResponse mapCategoryToCategoryResponseNoProducts(Category category) {
-        return CategoryResponse.builder()
-                .id(category.getId())
-                .name(category.getName())
-                .weatherSeason(category.getWeatherSeason())
-                .build();
-    }
-
     private static List<ProductRead> mapProductsToProductsRead(List<Product> products) {
         return products.stream().map((product) ->
                         ProductRead.builder()

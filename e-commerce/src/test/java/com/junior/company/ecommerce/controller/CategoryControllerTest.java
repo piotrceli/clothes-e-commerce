@@ -20,16 +20,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import static com.junior.company.ecommerce.mapper.CategoryMapper.mapCategoriesToCategoryResponses;
-import static com.junior.company.ecommerce.mapper.CategoryMapper.mapCategoryRequestToCategoryCreate;
-import static com.junior.company.ecommerce.mapper.CategoryMapper.mapCategoryRequestToCategoryUpdate;
-import static com.junior.company.ecommerce.mapper.CategoryMapper.mapCategoryToCategoryResponseNoProducts;
+import static com.junior.company.ecommerce.mapper.CategoryMapper.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -100,9 +93,10 @@ class CategoryControllerTest {
                 .id(1L)
                 .name("t-shirt")
                 .weatherSeason(WeatherSeason.SUMMER)
+                .products(new ArrayList<>())
                 .build();
 
-        CategoryResponse categoryResponse = mapCategoryToCategoryResponseNoProducts(category);
+        CategoryResponse categoryResponse = mapCategoryToCategoryResponse(category);
         given(categoryService.findCategoryByName(anyString())).willReturn(categoryResponse);
 
         Response expectedResponseBody = Response.builder()
@@ -152,7 +146,8 @@ class CategoryControllerTest {
                 .build();
 
         Category category = mapCategoryRequestToCategoryCreate(categoryRequest);
-        CategoryResponse categoryResponse = mapCategoryToCategoryResponseNoProducts(category);
+        category.setProducts(new ArrayList<>());
+        CategoryResponse categoryResponse = mapCategoryToCategoryResponse(category);
         given(categoryService.addCategory(any())).willReturn(categoryResponse);
 
         Response expectedResponseBody = Response.builder()
@@ -243,7 +238,8 @@ class CategoryControllerTest {
                 .build();
 
         Category category = mapCategoryRequestToCategoryUpdate(categoryRequest);
-        CategoryResponse categoryResponse = mapCategoryToCategoryResponseNoProducts(category);
+        category.setProducts(new ArrayList<>());
+        CategoryResponse categoryResponse = mapCategoryToCategoryResponse(category);
         given(categoryService.updateCategory(any())).willReturn(categoryResponse);
 
         Response expectedResponseBody = Response.builder()

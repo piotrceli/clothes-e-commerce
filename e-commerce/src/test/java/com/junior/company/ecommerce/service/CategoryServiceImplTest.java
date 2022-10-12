@@ -17,17 +17,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static com.junior.company.ecommerce.mapper.CategoryMapper.mapCategoriesToCategoryResponses;
 import static com.junior.company.ecommerce.mapper.CategoryMapper.mapCategoryRequestToCategoryCreate;
 import static com.junior.company.ecommerce.mapper.CategoryMapper.mapCategoryRequestToCategoryUpdate;
 import static com.junior.company.ecommerce.mapper.CategoryMapper.mapCategoryToCategoryResponse;
-import static com.junior.company.ecommerce.mapper.CategoryMapper.mapCategoryToCategoryResponseNoProducts;
 import static com.junior.company.ecommerce.mapper.ProductMapper.mapProductsToProductResponsesList;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -127,7 +122,8 @@ class CategoryServiceImplTest {
 
         given(categoryRepository.findByName(anyString())).willReturn(Optional.empty());
         Category category = mapCategoryRequestToCategoryCreate(categoryRequest);
-        CategoryResponse categoryResponse = mapCategoryToCategoryResponseNoProducts(category);
+        category.setProducts(new ArrayList<>());
+        CategoryResponse categoryResponse = mapCategoryToCategoryResponse(category);
 
         // when
         CategoryResponse result = categoryService.addCategory(categoryRequest);
@@ -309,7 +305,7 @@ class CategoryServiceImplTest {
         given(categoryRepository.findById(categoryId)).willReturn(Optional.of(category));
 
         // when then
-        assertThatThrownBy(()->categoryService.deleteCategoryById(categoryId))
+        assertThatThrownBy(() -> categoryService.deleteCategoryById(categoryId))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Cannot delete category with assigned products");
     }

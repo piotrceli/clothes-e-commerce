@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -49,8 +50,9 @@ public class CategoryServiceImpl implements CategoryService {
                     String.format("Category with name: %s already exists", categoryRequest.getName()));
         }
         Category category = CategoryMapper.mapCategoryRequestToCategoryCreate(categoryRequest);
+        category.setProducts(new ArrayList<>());
         categoryRepository.save(category);
-        return CategoryMapper.mapCategoryToCategoryResponseNoProducts(category);
+        return CategoryMapper.mapCategoryToCategoryResponse(category);
     }
 
     @Override
