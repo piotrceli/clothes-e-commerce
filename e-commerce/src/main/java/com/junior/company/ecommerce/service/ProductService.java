@@ -4,7 +4,9 @@ import com.junior.company.ecommerce.dto.ItemRequest;
 import com.junior.company.ecommerce.dto.ItemResponse;
 import com.junior.company.ecommerce.dto.ProductRequest;
 import com.junior.company.ecommerce.dto.ProductResponse;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface ProductService {
@@ -32,4 +34,10 @@ public interface ProductService {
     boolean assignToCategory(Long productId, Long categoryId);
 
     boolean unassignFromCategory(Long productId, Long categoryId);
+
+    boolean uploadProductImage(MultipartFile multipartFile, Long productId) throws IOException;
+
+    boolean deleteProductImageByProductId(Long productId);
+
+    byte[] getProductImage(Long productId) throws IOException;
 }

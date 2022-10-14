@@ -22,6 +22,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -45,6 +46,7 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -916,6 +918,149 @@ class ProductControllerTest {
         mockMvc.perform(put("/api/v1/products/unassign/{productId}/{categoryId}", productId, categoryId))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedResponseBody)));
+    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN"})
+    void shouldUploadProductImage() throws Exception {
+
+        // given
+        Long productId = 1L;
+        byte[] image = "image".getBytes();
+        MockMultipartFile mockMultipartFile = new MockMultipartFile("image", image);
+
+        given(productService.uploadProductImage(mockMultipartFile, productId)).willReturn(true);
+
+        Response expectedResponseBody = Response.builder()
+                .status(HttpStatus.OK)
+                .statusCode(HttpStatus.OK.value())
+                .message(String.format("Uploaded image for product with id: %s", productId))
+                .build();
+
+        // when then
+        mockMvc.perform(multipart("/api/v1/products/upload/{productId}", productId)
+                .file(mockMultipartFile))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedResponseBody)));
+    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN"})
+    void shouldNotUploadProductImage_givenInvalidProductId() throws Exception {
+
+        // given
+        Long productId = 0L;
+        byte[] image = "image".getBytes();
+        MockMultipartFile mockMultipartFile = new MockMultipartFile("image", image);
+
+        given(productService.uploadProductImage(mockMultipartFile, productId)).willThrow(
+                new ResourceNotFoundException(String.format("Product with id: %s not found", productId)));
+
+        Response expectedResponseBody = Response.builder()
+                .status(HttpStatus.NOT_FOUND)
+                .statusCode(HttpStatus.NOT_FOUND.value())
+                .message(String.format("Product with id: %s not found", productId))
+                .build();
+
+        // when then
+        mockMvc.perform(multipart("/api/v1/products/upload/{productId}", productId)
+                        .file(mockMultipartFile))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedResponseBody)));
+    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN"})
+    void shouldNotUploadProductImage_whenIOExceptionOccurs() throws Exception {
+
+        // given
+        Long productId = 1L;
+        byte[] image = "image".getBytes();
+        MockMultipartFile mockMultipartFile = new MockMultipartFile("image", image);
+
+        given(productService.uploadProductImage(mockMultipartFile, productId)).willReturn(false);
+
+        Response expectedResponseBody = Response.builder()
+                .status(HttpStatus.OK)
+                .statusCode(HttpStatus.OK.value())
+                .message(String.format("Uploaded image for product with id: %s", productId))
+                .build();
+
+        // when then
+        mockMvc.perform(multipart("/api/v1/products/upload/{productId}", productId)
+                        .file(mockMultipartFile))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedResponseBody)));
+    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN"})
+    void shouldDeleteProductImage() throws Exception {
+
+        // given
+        Long productId = 1L;
+
+        given(productService.deleteProductImageByProductId(productId)).willReturn(true);
+
+        Response expectedResponseBody = Response.builder()
+                .status(HttpStatus.OK)
+                .statusCode(HttpStatus.OK.value())
+                .message(String.format("Deleted image for product with id: %s", productId))
+                .build();
+
+        // when then
+        mockMvc.perform(delete("/api/v1/products/delete/image/{productId}", productId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedResponseBody)));
+    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN"})
+    void shouldNotDeleteProductImage_whenProductImageDoesNotExist() throws Exception {
+
+        // given
+        Long productId = 1L;
+
+        given(productService.deleteProductImageByProductId(productId)).willReturn(false);
+
+        Response expectedResponseBody = Response.builder()
+                .status(HttpStatus.OK)
+                .statusCode(HttpStatus.OK.value())
+                .message(String.format("Deleted image for product with id: %s", productId))
+                .build();
+
+        // when then
+        mockMvc.perform(delete("/api/v1/products/delete/image/{productId}", productId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedResponseBody)));
+    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN"})
+    void shouldNotDeleteProductImage_givenInvalidProductId() throws Exception {
+
+        // given
+        Long productId = 0L;
+
+        given(productService.deleteProductImageByProductId(productId)).willThrow(
+                new ResourceNotFoundException(String.format("Product with id: %s not found", productId)));
+
+        Response expectedResponseBody = Response.builder()
+                .status(HttpStatus.NOT_FOUND)
+                .statusCode(HttpStatus.NOT_FOUND.value())
+                .message(String.format("Product with id: %s not found", productId))
+                .build();
+
+        // when then
+        mockMvc.perform(delete("/api/v1/products/delete/image/{productId}", productId))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedResponseBody)));
     }
 }

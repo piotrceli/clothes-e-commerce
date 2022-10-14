@@ -18,15 +18,19 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Map;
 
 import static com.junior.company.ecommerce.swagger.SwaggerConstants.PRODUCTS_API_TAG;
+import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 
 @RestController
 @RequestMapping("api/v1/products")
@@ -198,5 +202,41 @@ public class ProductController {
                 .message(String.format("Unassigned product with id: %s from category with id: %s", productId, categoryId))
                 .data(Map.of("is_unassigned", productService.unassignFromCategory(productId, categoryId)))
                 .build());
+    }
+
+    @PostMapping("upload/{productId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ApiOperation(value = "Upload a new image of product", notes = "Available for ADMIN\n\n" +
+            "Allows to upload an image of the existing product.")
+    public ResponseEntity<Response> uploadProductImage(@RequestPart(value = "image")MultipartFile multipartFile,
+                                                       @PathVariable Long productId) throws IOException {
+        return ResponseEntity.ok(Response.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.OK)
+                .statusCode(HttpStatus.OK.value())
+                .message(String.format("Uploaded image for product with id: %s", productId))
+                .data(Map.of("is_uploaded", productService.uploadProductImage(multipartFile, productId)))
+                .build());
+    }
+
+    @DeleteMapping("delete/image/{productId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ApiOperation(value = "Delete an existing image of product", notes = "Available for ADMIN\n\n" +
+            "Allows to delete an image of the existing product.")
+    public ResponseEntity<Response> deleteProductImageByProductId(@PathVariable Long productId) {
+        return ResponseEntity.ok(Response.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.OK)
+                .statusCode(HttpStatus.OK.value())
+                .message(String.format("Deleted image for product with id: %s", productId))
+                .data(Map.of("is_deleted", productService.deleteProductImageByProductId(productId)))
+                .build());
+    }
+
+    @GetMapping(path = "/image/{productId}", produces = IMAGE_PNG_VALUE)
+    @ApiOperation(value = "Get product's image", notes = "Available for EVERYONE\n\n" +
+            "Allows to get an image of the existing product.")
+    public byte[] getProductImage(@PathVariable Long productId) throws IOException {
+        return productService.getProductImage(productId);
     }
 }

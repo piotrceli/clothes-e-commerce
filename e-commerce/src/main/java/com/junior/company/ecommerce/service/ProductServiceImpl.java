@@ -18,29 +18,31 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.support.PagedListHolder;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
+import java.io.File;
+import java.io.IOException;
 import java.math.RoundingMode;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import static com.junior.company.ecommerce.controller.constant.ImagesConstant.COAT_URL;
-import static com.junior.company.ecommerce.controller.constant.ImagesConstant.HOODIE_URL;
-import static com.junior.company.ecommerce.controller.constant.ImagesConstant.OTHER_URL;
-import static com.junior.company.ecommerce.controller.constant.ImagesConstant.TROUSERS_URL;
-import static com.junior.company.ecommerce.controller.constant.ImagesConstant.T_SHIRT_URL;
 import static com.junior.company.ecommerce.mapper.ProductMapper.mapProductRequestToProductCreate;
 import static com.junior.company.ecommerce.mapper.ProductMapper.mapProductRequestToProductUpdate;
 import static com.junior.company.ecommerce.mapper.ProductMapper.mapProductToProductResponse;
 import static com.junior.company.ecommerce.mapper.ProductMapper.mapProductToProductResponseNoItems;
 import static com.junior.company.ecommerce.mapper.ProductMapper.mapProductsToProductResponses;
 import static com.junior.company.ecommerce.mapper.ProductMapper.mapProductsToProductResponsesList;
+import static java.nio.file.Files.copy;
+import static java.nio.file.Paths.get;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 @Service
 @RequiredArgsConstructor
@@ -52,6 +54,7 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryRepository categoryRepository;
     private final ItemRepository itemRepository;
     private final WeatherService weatherService;
+    public static final String DIRECTORY = "./src/main/resources/static/images/";
 
     @Override
     public List<ProductResponse> findProductsPage(int page, int size) {
@@ -72,7 +75,6 @@ public class ProductServiceImpl implements ProductService {
         log.info("Creating new product");
         Product product = mapProductRequestToProductCreate(productRequest);
         product.setCategories(identifyCategories(productRequest));
-        product.setImageUrl(assignImageUrl(product));
         productRepository.save(product);
         return mapProductToProductResponseNoItems(product);
     }
@@ -97,6 +99,7 @@ public class ProductServiceImpl implements ProductService {
         log.info("Deleting product with id: {}", productId);
         Product product = productRepository.findById(productId).orElseThrow(() ->
                 new ResourceNotFoundException(String.format("Product with id: %s not found", productId)));
+        deleteProductImageByProductId(productId);
         productRepository.delete(product);
         return true;
     }
@@ -111,36 +114,9 @@ public class ProductServiceImpl implements ProductService {
         return categories;
     }
 
-    private String assignImageUrl(Product product) {
-
-        Map<String, String> images = new HashMap<>();
-        images.put("t-shirt", T_SHIRT_URL);
-        images.put("trousers", TROUSERS_URL);
-        images.put("hoodie", HOODIE_URL);
-        images.put("coat", COAT_URL);
-        images.put("other", OTHER_URL);
-
-        for (Category category : product.getCategories()) {
-            if (category.getName().contains("t-shirt")) {
-                return images.get("t-shirt");
-            }
-            if (category.getName().contains("trousers")) {
-                return images.get("trousers");
-            }
-            if (category.getName().contains("hoodie")) {
-                return images.get("hoodie");
-            }
-            if (category.getName().contains("coat")) {
-                return images.get("coat");
-            }
-        }
-        return images.get("other");
-    }
-
     @Override
     public List<ProductResponse> findProductsMatchToWeather(String city, String country, int page, int size) {
         log.info("Retrieving list of products matched to actual weather in: {}, {}", city, country);
-
         Double temperature = weatherService.getTemperature(city, country);
         String weatherSeasonName = temperature <= 5.0 ? "WINTER" : temperature <= 15.0 ? "AUTUMN" :
                 temperature <= 23 ? "SPRING" : "SUMMER";
@@ -253,5 +229,45 @@ public class ProductServiceImpl implements ProductService {
         throw new IllegalStateException(
                 String.format("Product with id: %s is not assigned to category with id: %s",
                         productId, categoryId));
+    }
+
+    @Override
+    public boolean uploadProductImage(MultipartFile multipartFile, Long productId) {
+        log.info("Uploading image of product with id: {}", productId);
+        Product product = productRepository.findById(productId).orElseThrow(() ->
+                new ResourceNotFoundException(String.format("Product with id: %s not found", productId)));
+        String fileName = productId + ".png";
+        Path fileStorage = get(DIRECTORY, fileName);
+        try {
+            copy(multipartFile.getInputStream(), fileStorage, REPLACE_EXISTING);
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            return false;
+        }
+        product.setImageUrl(fileName);
+        return true;
+    }
+
+    @Override
+    public boolean deleteProductImageByProductId(Long productId) {
+        log.info("Deleting image of product with id: {}", productId);
+        Product product = productRepository.findById(productId).orElseThrow(() ->
+                new ResourceNotFoundException(String.format("Product with id: %s not found", productId)));
+        File image = new File(DIRECTORY + product.getImageUrl());
+        product.setImageUrl(null);
+        return image.delete();
+    }
+
+    @Override
+    public byte[] getProductImage(Long productId) {
+        log.info("Retrieving image of product with id: {}", productId);
+        Product product = productRepository.findById(productId).orElseThrow(() ->
+                new ResourceNotFoundException(String.format("Product with id: %s not found", productId)));
+        String imageName = product.getImageUrl();
+        try {
+            return Files.readAllBytes(Paths.get(DIRECTORY + imageName));
+        } catch (IOException e) {
+            throw new ResourceNotFoundException(String.format("Image of product with id: %s not found", productId));
+        }
     }
 }

@@ -22,14 +22,17 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.junior.company.ecommerce.controller.constant.ImagesConstant.T_SHIRT_URL;
 import static com.junior.company.ecommerce.mapper.ItemMapper.mapItemRequestToItemCreate;
 import static com.junior.company.ecommerce.mapper.ItemMapper.mapItemRequestToItemUpdate;
 import static com.junior.company.ecommerce.mapper.ItemMapper.mapItemToItemResponse;
@@ -39,6 +42,7 @@ import static com.junior.company.ecommerce.mapper.ProductMapper.mapProductToProd
 import static com.junior.company.ecommerce.mapper.ProductMapper.mapProductToProductResponseNoItems;
 import static com.junior.company.ecommerce.mapper.ProductMapper.mapProductsToProductResponses;
 import static com.junior.company.ecommerce.mapper.ProductMapper.mapProductsToProductResponsesList;
+import static com.junior.company.ecommerce.service.ProductServiceImpl.DIRECTORY;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -62,6 +66,9 @@ class ProductServiceImplTest {
 
     @Mock
     private WeatherService weatherService;
+
+    @Mock
+    private MultipartFile multipartFile;
 
     @InjectMocks
     private ProductServiceImpl productService;
@@ -179,7 +186,6 @@ class ProductServiceImplTest {
         Product product = mapProductRequestToProductCreate(productRequest);
         given(categoryRepository.findById(anyLong())).willReturn(Optional.of(category));
         product.setCategories(Set.of(category));
-        product.setImageUrl(T_SHIRT_URL);
         ProductResponse productResponse = mapProductToProductResponseNoItems(product);
 
         // when
@@ -866,5 +872,191 @@ class ProductServiceImplTest {
         assertThatThrownBy(() -> productService.unassignFromCategory(productId, categoryId))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining(String.format("Category with id: %s not found", categoryId));
+    }
+
+    @Test
+    void shouldUploadProductImage_givenValidProductId() {
+
+        // given
+        Long productId = 1L;
+        Product product = Product.builder()
+                .id(productId)
+                .name("basic black t-shirt")
+                .price(29.99)
+                .description("description_one")
+                .items(new ArrayList<>())
+                .build();
+        multipartFile = new MockMultipartFile("name", "".getBytes());
+
+        given(productRepository.findById(anyLong())).willReturn(Optional.of(product));
+
+        // when
+        boolean result = productService.uploadProductImage(multipartFile, productId);
+
+        // then
+        assertThat(result).isTrue();
+        assertThat(product.getImageUrl()).isEqualTo(productId + ".png");
+    }
+
+    @Test
+    void shouldNotUploadProductImage_whenIOExceptionOccurs() throws IOException {
+
+        // given
+        Long productId = 1L;
+        Product product = Product.builder()
+                .id(productId)
+                .name("basic black t-shirt")
+                .price(29.99)
+                .description("description_one")
+                .items(new ArrayList<>())
+                .build();
+        given(multipartFile.getInputStream()).willThrow(new IOException());
+
+        given(productRepository.findById(anyLong())).willReturn(Optional.of(product));
+
+        // when
+        boolean result = productService.uploadProductImage(multipartFile, productId);
+
+        // then
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    void shouldNotUploadProductImage_givenInvalidProductId() {
+
+        // given
+        Long productId = 0L;
+        multipartFile = new MockMultipartFile("name", "".getBytes());
+
+        given(productRepository.findById(anyLong())).willReturn(Optional.empty());
+
+        // when then
+        assertThatThrownBy(() -> productService.uploadProductImage(multipartFile, productId))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining(String.format("Product with id: %s not found", productId));
+    }
+
+    @Test
+    void shouldDeleteProductImageByProductId_givenValidProductId() throws Exception{
+
+        // given
+        Long productId = 1L;
+        Product product = Product.builder()
+                .id(productId)
+                .name("basic black t-shirt")
+                .price(29.99)
+                .description("description_one")
+                .imageUrl("test_image_9012")
+                .items(new ArrayList<>())
+                .build();
+
+        given(productRepository.findById(productId)).willReturn(Optional.of(product));
+
+        File tempImage = new File(DIRECTORY + product.getImageUrl());
+        tempImage.createNewFile();
+
+        // when
+        boolean result = productService.deleteProductImageByProductId(productId);
+
+        // then
+        assertThat(result).isTrue();
+        assertThat(product.getImageUrl()).isNull();
+    }
+
+    @Test
+    void shouldNotDeleteProductImageByProductId_whenProductImageDoesNotExist() {
+
+        // given
+        Long productId = 1L;
+        Product product = Product.builder()
+                .id(productId)
+                .name("basic black t-shirt")
+                .price(29.99)
+                .description("description_one")
+                .items(new ArrayList<>())
+                .build();
+
+        given(productRepository.findById(productId)).willReturn(Optional.of(product));
+
+        // when
+        boolean result = productService.deleteProductImageByProductId(productId);
+
+        // then
+        assertThat(result).isFalse();
+        assertThat(product.getImageUrl()).isNull();
+    }
+
+    @Test
+    void shouldNotDeleteProductImageByProductId_givenInvalidProductId() {
+
+        // given
+        Long productId = 0L;
+        given(productRepository.findById(productId)).willReturn(Optional.empty());
+
+        // when then
+        assertThatThrownBy(() -> productService.deleteProductImageByProductId(productId))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining(String.format("Product with id: %s not found", productId));
+    }
+
+    @Test
+    void shouldGetProductImage_givenValidProductId() throws Exception{
+
+        // given
+        Long productId =  1L;
+        Product product = Product.builder()
+                .id(productId)
+                .name("basic black t-shirt")
+                .price(29.99)
+                .description("description_one")
+                .imageUrl("test_image_9012")
+                .items(new ArrayList<>())
+                .build();
+
+        given(productRepository.findById(productId)).willReturn(Optional.of(product));
+        File tempImage = new File(DIRECTORY + product.getImageUrl());
+        tempImage.createNewFile();
+
+        // when
+        byte[] result = productService.getProductImage(productId);
+
+        // then
+        assertThat(result).isNotNull();
+        tempImage.delete();
+    }
+
+    @Test
+    void shouldNotGetProductImage_whenProductImageDoesNotExist(){
+
+        // given
+        Long productId =  1L;
+        Product product = Product.builder()
+                .id(productId)
+                .name("basic black t-shirt")
+                .price(29.99)
+                .description("description_one")
+                .imageUrl("test_image_9012")
+                .items(new ArrayList<>())
+                .build();
+
+        given(productRepository.findById(productId)).willReturn(Optional.of(product));
+
+        // when then
+        assertThatThrownBy(() -> productService.getProductImage(productId))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining(String.format("Image of product with id: %s not found", productId));
+    }
+
+    @Test
+    void shouldNotGetProductImage_givenInvalidProductId() {
+
+        // given
+        Long productId =  0L;
+        given(productRepository.findById(productId)).willReturn(Optional.empty());
+
+        // when then
+        assertThatThrownBy(() -> productService.getProductImage(productId))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining(String.format("Product with id: %s not found", productId));
     }
 }
