@@ -27,7 +27,7 @@ public class Category {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "name")
+    @Column(name = "category_name")
     private String name;
 
     @Column(name="weather_season")

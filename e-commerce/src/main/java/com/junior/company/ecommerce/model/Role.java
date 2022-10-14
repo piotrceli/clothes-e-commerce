@@ -13,7 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "role")
+@Table(name = "app_role")
 @Getter
 @SuperBuilder
 @AllArgsConstructor
@@ -25,6 +25,6 @@ public class Role {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "name")
+    @Column(name = "role_name")
     private String name;
 }

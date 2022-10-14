@@ -30,7 +30,7 @@ public class Product {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "name")
+    @Column(name = "product_name")
     private String name;
 
     @Column(name = "price")
@@ -39,7 +39,7 @@ public class Product {
     @Column(name = "image_url")
     private String imageUrl;
 
-    @Column(name = "description")
+    @Column(name = "product_description")
     private String description;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)

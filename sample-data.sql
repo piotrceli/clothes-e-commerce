@@ -1,6 +1,6 @@
 use clothes_e_commerce;
 
-INSERT INTO role (name)
+INSERT INTO app_role (role_name)
 VALUES ('ADMIN'), ('USER');
 
 INSERT INTO cart (total_value)
@@ -12,7 +12,7 @@ VALUES (100, 'Górczewska', 'Warsaw', 'Poland'),
 (33, 'Dworcowa', 'Płock', 'Poland'),
 (61, 'Kartuska', 'Gdańsk', 'Poland');
 
-INSERT INTO app_user (email, password, enabled, first_name, last_name, phone_number, date_of_birth, address_id, cart_id)
+INSERT INTO app_user (email, user_password, enabled, first_name, last_name, phone_number, date_of_birth, address_id, cart_id)
 VALUES ('admin@email.com', '$2a$10$RCisbeq2PYJyQ6NKD17GK.SG3WsxvGUYIvn4YefKefeW/BThBwb6S', 1, 'admin', 'admin', '100100100', '1990-01-01', 1, 1),
 ('user@email.com', '$2a$10$RwEPbKlCRKX.A8z6hMS8tO/WXVudbV892yDZlcNE/L8IvQW/rulMC', 1, 'user', 'user', '200200200', '1980-02-02', 2, 2),
 ('tom@email.com', '$2a$10$YlPmm2A.XsutY/m2XYuE.eEIPBlVBDyJID4An9oUkcuU0lP3LPkR2', 1, 'tom', 'smith', '300300300', '1985-03-03', 3, 3),
@@ -21,10 +21,10 @@ VALUES ('admin@email.com', '$2a$10$RCisbeq2PYJyQ6NKD17GK.SG3WsxvGUYIvn4YefKefeW/
 INSERT INTO user_role 
 VALUES (1,1), (2,2), (3,2), (4,2);
 
-INSERT INTO category (name, weather_season)
-VALUES('dresses', 0), ('t-shirts', 1), ('blouses', 2), ('jackets', 3), ('trousers', 4), ('hats', 0), ('scarfs', 3), ('underwear', 0);
+INSERT INTO category (category_name, weather_season)
+VALUES('dresses', 0), ('t-shirts', 1), ('blouses', 2), ('jackets', 3), ('trousers', 4), ('hats', 0), ('scarfs', 3), ('underwear', 4);
 
-INSERT INTO product (name, price, image_url, description)
+INSERT INTO product (product_name, price, image_url, product_description)
 VALUES ('summer dress - green', 199.99, '1.png', 'Dress for the long summer days'),
 ('summer dress - aqua', 199.99, '2.png', 'Dress for the long summer days'),
 ('tie belt dress', '219.99', '3.png', 'Casual dress'),

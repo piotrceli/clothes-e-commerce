@@ -35,7 +35,7 @@ public class AppUser {
     @Column(name = "email")
     private String email;
 
-    @Column(name = "password")
+    @Column(name = "user_password")
     private String password;
 
     @ManyToMany(fetch = FetchType.EAGER)
