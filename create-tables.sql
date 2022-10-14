@@ -16,6 +16,7 @@ CREATE TABLE category (
   category_name varchar(50) NOT NULL,
   weather_season int NOT NULL,
 
+  CONSTRAINT UQ_category_category_name UNIQUE (category_name),
   PRIMARY KEY (id)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=UTF8MB4;
 
@@ -82,6 +83,7 @@ CREATE TABLE app_user (
   CONSTRAINT FK_app_user_cart FOREIGN KEY (cart_id) REFERENCES cart (id),
   CONSTRAINT UQ_app_user_address_id UNIQUE (address_id),
   CONSTRAINT UQ_app_user_cart_id UNIQUE (cart_id),
+  CONSTRAINT UQ_app_user_email UNIQUE (email),
   PRIMARY KEY (id)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=UTF8MB4;
 
