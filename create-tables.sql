@@ -90,11 +90,6 @@ CREATE TABLE `role` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=UTF8MB4;
 
-INSERT INTO `role`
-VALUES 
-(1, 'ADMIN'),
-(2, 'USER');
-
 CREATE TABLE `user_role` (
   `app_user_id` bigint NOT NULL,
   `role_id` bigint NOT NULL,

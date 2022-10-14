@@ -22,10 +22,10 @@ This application is a sample online clothes store.
 <br>
 <h3>Testing flow proposal:</h3>
 <ol>
-  <li>Use an SQL script to create a database and tables in the MySQL environment</li>
+  <li>Use an SQL script (create-tables) to create a database and tables in the MySQL environment</li>
+  <li>Use an SQL script (sample-data) to create a sample data</li>
   <li>Fill in information in the application.properties file to configure the database environment <i>note: refers to username and password</i></li>
   <li>Start the application</li>
-  <li>A Sample data will be created when the application starts by a CommandLineRunner</li>
   <li>Test the application with the use of an API platform (e.g. Postman) and Swagger (http://localhost:8080/swagger-ui/index.html)</li>
   <li>The additional information about the API and its endpoints is available in Swagger's documentation</li>
 </ol>
