@@ -2,6 +2,7 @@ package com.junior.company.ecommerce.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.Column;
@@ -34,17 +35,11 @@ public class Item {
     private String size;
 
     @Column(name = "quantity")
+    @Setter
     private Integer quantity;
 
     @ManyToOne
     @JoinColumn(name = "product_id")
+    @Setter
     private Product product;
-
-    public void setProduct(Product product) {
-        this.product = product;
-    }
-
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
-    }
 }

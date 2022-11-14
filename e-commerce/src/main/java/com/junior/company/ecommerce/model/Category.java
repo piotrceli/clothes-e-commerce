@@ -2,6 +2,7 @@ package com.junior.company.ecommerce.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.Column;
@@ -37,9 +38,6 @@ public class Category {
     @JoinTable(name = "product_category",
             joinColumns = @JoinColumn(name = "category_id"),
             inverseJoinColumns = @JoinColumn(name = "product_id"))
+    @Setter
     private List<Product> products;
-
-    public void setProducts(List<Product> products) {
-        this.products = products;
-    }
 }

@@ -2,6 +2,7 @@ package com.junior.company.ecommerce.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.Column;
@@ -30,9 +31,6 @@ public class CartItem {
     private Item item;
 
     @Column(name = "amount")
+    @Setter
     private Integer amount;
-
-    public void setAmount(Integer amount) {
-        this.amount = amount;
-    }
 }

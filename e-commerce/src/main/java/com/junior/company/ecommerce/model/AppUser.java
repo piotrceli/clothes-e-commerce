@@ -2,6 +2,7 @@ package com.junior.company.ecommerce.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.CascadeType;
@@ -33,18 +34,22 @@ public class AppUser {
     private Long id;
 
     @Column(name = "email")
+    @Setter
     private String email;
 
     @Column(name = "user_password")
+    @Setter
     private String password;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role",
             joinColumns = @JoinColumn(name = "app_user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @Setter
     private List<Role> roles;
 
     @Column(name = "enabled")
+    @Setter
     private boolean enabled;
 
     @Column(name = "first_name")
@@ -65,33 +70,11 @@ public class AppUser {
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "cart_id")
+    @Setter
     private Cart cart;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "app_user_id")
+    @Setter
     List<Order> orders;
-
-    public void setRoles(List<Role> roles) {
-        this.roles = roles;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setCart(Cart cart) {
-        this.cart = cart;
-    }
-
-    public void setOrders(List<Order> orders) {
-        this.orders = orders;
-    }
 }

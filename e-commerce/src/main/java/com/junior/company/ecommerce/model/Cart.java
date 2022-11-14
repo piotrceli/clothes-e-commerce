@@ -2,6 +2,7 @@ package com.junior.company.ecommerce.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.Column;
@@ -27,13 +28,10 @@ public class Cart {
     private Long id;
 
     @Column(name = "total_value")
+    @Setter
     private Double totalValue;
 
     @OneToMany(orphanRemoval = true)
     @JoinColumn(name = "cart_id")
     private List<CartItem> cartItems;
-
-    public void setTotalValue(Double totalValue) {
-        this.totalValue = totalValue;
-    }
 }

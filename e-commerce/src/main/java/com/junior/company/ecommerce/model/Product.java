@@ -2,6 +2,7 @@ package com.junior.company.ecommerce.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.CascadeType;
@@ -37,29 +38,20 @@ public class Product {
     private Double price;
 
     @Column(name = "image_url")
+    @Setter
     private String imageUrl;
 
     @Column(name = "product_description")
     private String description;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Setter
     private List<Item> items;
 
     @ManyToMany
     @JoinTable(name = "product_category",
             joinColumns = @JoinColumn(name = "product_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id"))
+    @Setter
     private Set<Category> categories;
-
-    public void setCategories(Set<Category> categories) {
-        this.categories = categories;
-    }
-
-    public void setItems(List<Item> items) {
-        this.items = items;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
 }
